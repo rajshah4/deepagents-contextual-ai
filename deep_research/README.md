@@ -158,9 +158,42 @@ The notebook provides:
 - Interactive cells to run research queries
 - Rich formatted output
 
+### Option 3: LangGraph Deployment
+
+Deploy the agent using LangGraph Studio or LangGraph Cloud:
+
+**Local Development with LangGraph Studio:**
+1. Open LangGraph Studio
+2. Select the `deep_research` directory
+3. The agent will be loaded from `agent.py` as configured in `langgraph.json`
+4. Interact with the agent through the Studio interface
+
+**LangGraph Cloud Deployment:**
+```bash
+# Deploy to LangGraph Cloud
+langgraph deploy
+```
+
+The `langgraph.json` configuration:
+- **Graph name**: `research`
+- **Entry point**: `./agent.py:agent`
+- **Dependencies**: Current directory (`.`)
+- **Environment**: Variables loaded from `.env`
+
 ## Key Concepts
 
-### 1. Context Offloading
+### 1. File-Based Report Generation
+
+The agent writes structured reports to `/final_report.md` with professional formatting:
+
+- **Structured approach**: Different patterns for comparisons, lists, summaries
+- **Numbered citations**: Inline references [1], [2] with Sources section
+- **Professional style**: Text-heavy paragraphs, no self-referential language
+- **Verification**: Saves original question to `/research_request.md` for validation
+
+This creates a clear separation between the research process and the final deliverable.
+
+### 2. Context Offloading
 
 The `tavily_search` tool demonstrates a critical pattern for long-running agent trajectories:
 
@@ -170,7 +203,7 @@ The `tavily_search` tool demonstrates a critical pattern for long-running agent 
 
 This pattern is inspired by [Manus's context engineering approach](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus).
 
-### 2. Strategic Thinking
+### 3. Strategic Thinking
 
 The `think_tool` creates deliberate pauses in the research workflow:
 
@@ -186,7 +219,7 @@ This simple tool encourages the agent to:
 - Assess information gaps
 - Decide whether to continue searching or provide an answer
 
-### 3. Parallel Research
+### 4. Parallel Research
 
 The subagent system enables parallel research execution:
 
@@ -204,7 +237,7 @@ The main agent can spawn multiple research subagents in parallel:
 - **Comparisons**: 1 subagent per element (e.g., "Compare X vs Y vs Z" → 3 subagents)
 - **Multi-faceted research**: 1 subagent per aspect
 
-### 4. Built-in Context Management
+### 5. Built-in Context Management
 
 The `deepagents` package automatically includes:
 - **SummarizationMiddleware** - Compresses context when it gets too long
@@ -217,7 +250,9 @@ The `deepagents` package automatically includes:
 deep_research/
 ├── README.md                    # This file
 ├── pyproject.toml              # Project dependencies
-├── run_research.py             # Standalone Python script
+├── langgraph.json              # LangGraph deployment configuration
+├── agent.py                    # Standalone agent for LangGraph (exports 'agent')
+├── run_research.py             # Standalone Python script for testing
 ├── research_agent.ipynb        # Interactive Jupyter notebook
 ├── utils.py                    # Display utilities (Rich formatting)
 └── research_agent/             # Research agent module
@@ -230,17 +265,22 @@ deep_research/
 
 When you run a research query, the agent will:
 
-1. **Plan the research** using `write_todos`
-2. **Delegate to subagent(s)** using `task`
-3. **Execute searches** using `tavily_search`
-4. **Reflect on findings** using `think_tool`
-5. **Save results to files** for later reference
-6. **Return concise answer** based on gathered information
+1. **Save the research question** to `/research_request.md`
+2. **Plan the research** using `write_todos`
+3. **Delegate to subagent(s)** using `task`
+4. **Execute searches** using `tavily_search`
+5. **Reflect on findings** using `think_tool`
+6. **Write final report** to `/final_report.md` with numbered citations
+7. **Verify completeness** by reading `/research_request.md`
 
 The output includes:
 - Search summaries with file references
 - Strategic reflections at each step
-- Final comprehensive answer
+- Professional report in `/final_report.md` with:
+  - Structured sections (comparisons, lists, or summaries)
+  - Numbered inline citations [1], [2], [3]
+  - Sources section with full URLs
+  - Comprehensive, text-heavy content
 
 ## Customization
 
