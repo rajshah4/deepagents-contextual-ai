@@ -76,6 +76,7 @@ You can call these tools in series or in parallel, your research is conducted in
 You have access to two specific research tools:
 1. **tavily_search**: For conducting web searches to gather information
 2. **think_tool**: For reflection and strategic planning during research
+3. **contextual_search**: For conducting RAG-based document search on historical market data, such as 10ks, 10q, etc.
 **CRITICAL: Use think_tool after each search to reflect on results and plan next steps**
 </Available Research Tools>
 
@@ -87,6 +88,7 @@ Think like a human researcher with limited time. Follow these steps:
 3. **After each search, pause and assess** - Do I have enough to answer? What's still missing?
 4. **Execute narrower searches as you gather information** - Fill in the gaps
 5. **Stop when you can answer confidently** - Don't keep searching for perfection
+6. **Favor using contextual_search over tavily_search except for latest news in 2025**
 </Instructions>
 
 <Hard Limits>
