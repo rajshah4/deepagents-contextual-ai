@@ -1,16 +1,33 @@
 """Research Tools.
 
 This module provides search and content processing utilities for the research agent,
-using Tavily for URL discovery and fetching full webpage content.
+using Tavily for URL discovery and fetching full webpage content, and ContextualAI
+for RAG-based document search.
 """
 
+import os
 import httpx
 from langchain_core.tools import InjectedToolArg, tool
 from markdownify import markdownify
 from tavily import TavilyClient
 from typing_extensions import Annotated, Literal
 
+try:
+    from contextual import ContextualAI
+    CONTEXTUAL_AI_AVAILABLE = True
+except ImportError:
+    CONTEXTUAL_AI_AVAILABLE = False
+
 tavily_client = TavilyClient()
+
+# Initialize ContextualAI client if available
+contextual_client = None
+contextual_agent_id = None
+if CONTEXTUAL_AI_AVAILABLE:
+    api_key = os.getenv("CONTEXTUAL_AI_API_KEY")
+    contextual_agent_id = os.getenv("CONTEXTUAL_AI_AGENT_ID")
+    if api_key:
+        contextual_client = ContextualAI(api_key=api_key)
 
 
 def fetch_webpage_content(url: str, timeout: float = 10.0) -> str:
@@ -86,6 +103,96 @@ def tavily_search(
 {chr(10).join(result_texts)}"""
 
     return response
+
+
+@tool(parse_docstring=True)
+def contextual_search(
+    query: str,
+    max_results: Annotated[int, InjectedToolArg] = 10,
+) -> str:
+    """Search ContextualAI RAG knowledge base for information on a given query.
+
+    Uses ContextualAI to retrieve relevant document chunks from the configured knowledge base.
+    Returns formatted results with full content and attribution metadata.
+
+    Args:
+        query: Search query to execute
+        max_results: Maximum number of results to return (default: 10)
+
+    Returns:
+        Formatted search results with document content and attribution
+    """
+    if not CONTEXTUAL_AI_AVAILABLE:
+        return "Error: ContextualAI package is not installed. Please install it to use this tool."
+    
+    if not contextual_client or not contextual_agent_id:
+        return "Error: ContextualAI client not configured. Please set CONTEXTUAL_AI_API_KEY and CONTEXTUAL_AI_AGENT_ID environment variables."
+
+    try:
+        # Query ContextualAI with include_retrieval_content_text to get actual content
+        query_result = contextual_client.agents.query.create(
+            agent_id=contextual_agent_id,
+            messages=[{
+                "content": query,
+                "role": "user"
+            }],
+            retrievals_only=True,
+            include_retrieval_content_text=True
+        )
+
+        # Extract retrieval contents
+        retrieval_contents = query_result.retrieval_contents or []
+        
+        # Limit results
+        retrieval_contents = retrieval_contents[:max_results]
+
+        if not retrieval_contents:
+            return f"🔍 No results found for '{query}' in ContextualAI knowledge base."
+
+        # Format results
+        result_texts = []
+        for i, content in enumerate(retrieval_contents, 1):
+            doc_name = getattr(content, 'doc_name', 'Unknown Document')
+            content_text = getattr(content, 'content_text', None)
+            content_id = getattr(content, 'content_id', 'N/A')
+            doc_id = getattr(content, 'doc_id', 'N/A')
+            page = getattr(content, 'page', None)
+            format_type = getattr(content, 'format', 'unknown')
+            score = getattr(content, 'score', None)
+
+            # Build attribution string
+            attribution_parts = [f"Context ID: {content_id}", f"Doc ID: {doc_id}"]
+            if page is not None:
+                attribution_parts.append(f"Page: {page}")
+            attribution = " | ".join(attribution_parts)
+            
+            if score is not None:
+                attribution += f" | Score: {score:.4f}"
+
+            # Format content
+            if content_text:
+                content_display = content_text
+            else:
+                content_display = f"[Content not available - {format_type} format]"
+
+            result_text = f"""## {doc_name}
+**Attribution:** {attribution}
+
+{content_display}
+
+---
+"""
+            result_texts.append(result_text)
+
+        # Format final response
+        response = f"""🔍 Found {len(result_texts)} result(s) for '{query}' in ContextualAI knowledge base:
+
+{chr(10).join(result_texts)}"""
+        
+        return response
+
+    except Exception as e:
+        return f"Error searching ContextualAI knowledge base: {str(e)}"
 
 
 @tool(parse_docstring=True)

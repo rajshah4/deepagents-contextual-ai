@@ -23,7 +23,20 @@ Set your API keys in your environment:
 export ANTHROPIC_API_KEY=your_anthropic_api_key_here  # Required for Claude model
 export GOOGLE_API_KEY=your_google_api_key_here        # Required for Gemini model ([get one here](https://ai.google.dev/gemini-api/docs))
 export TAVILY_API_KEY=your_tavily_api_key_here        # Required for web search ([get one here](https://www.tavily.com/)) with a generous free tier
+export CONTEXTUAL_AI_API_KEY=your_contextual_ai_api_key_here  # Required for ContextualAI RAG search ([get one here](https://www.contextual.ai/))
+export CONTEXTUAL_AI_AGENT_ID=your_agent_id_here       # Your ContextualAI agent ID
 export LANGSMITH_API_KEY=your_langsmith_api_key_here  # [LangSmith API key](https://smith.langchain.com/settings) (free to sign up)
+```
+
+Alternatively, create a `.env` file in the `deep_research` directory:
+
+```bash
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GOOGLE_API_KEY=your_google_api_key_here
+TAVILY_API_KEY=your_tavily_api_key_here
+CONTEXTUAL_AI_API_KEY=your_contextual_ai_api_key_here
+CONTEXTUAL_AI_AGENT_ID=your_agent_id_here
+LANGSMITH_API_KEY=your_langsmith_api_key_here
 ```
 
 ## Usage Options
@@ -106,5 +119,6 @@ The deep research agent adds the following custom tools beyond the built-in deep
 | Tool Name | Description |
 |-----------|-------------|
 | `tavily_search` | Web search tool that uses Tavily purely as a URL discovery engine. Performs searches using Tavily API to find relevant URLs, fetches full webpage content via HTTP with proper User-Agent headers (avoiding 403 errors), converts HTML to markdown, and returns the complete content without summarization to preserve all information for the agent's analysis. Works with both Claude and Gemini models. |
+| `contextual_search` | RAG-based document search tool that uses ContextualAI to search a knowledge base. Retrieves relevant document chunks with full content text, attribution metadata (Context ID, Doc ID, Page #), and relevance scores. Perfect for searching internal documents, PDFs, and structured data. |
 | `think_tool` | Strategic reflection mechanism that helps the agent pause and assess progress between searches, analyze findings, identify gaps, and plan next steps. |
 

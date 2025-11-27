@@ -18,6 +18,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "langgraph-cli[inmem]>=0.1.55",
     "langchain-google-genai>=3.1.0",
+    "contextual-client>=0.1.0",
 ]
 
 [project.optional-dependencies]
