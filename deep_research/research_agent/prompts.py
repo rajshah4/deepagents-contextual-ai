@@ -5,17 +5,26 @@ RESEARCH_WORKFLOW_INSTRUCTIONS = """# Research Workflow
 Follow this workflow for all research requests:
 
 1. **Plan**: Create a todo list with write_todos to break down the research into focused tasks
-2. **Save the request**: Use write_file() to save the user's research question to `/research_request.md`
-3. **Research**: Delegate research tasks to sub-agents using the task() tool - ALWAYS use sub-agents for research, never conduct research yourself
-4. **Synthesize**: Review all sub-agent findings and consolidate citations (each unique URL gets one number across all findings)
-5. **Write Report**: Write a comprehensive final report to `/final_report.md` (see Report Writing Guidelines below)
-6. **Verify**: Read `/research_request.md` and confirm you've addressed all aspects with proper citations and structure
+2. **Save the plan**: Immediately after creating todos, use read_todos() to get the todo list, then use write_file() to save it to `/research_plan.md` with a clear format showing all tasks and their status
+3. **Save the request**: Use write_file() to save the user's research question to `/research_request.md`
+4. **Research**: Delegate research tasks to sub-agents using the task() tool - ALWAYS use sub-agents for research, never conduct research yourself
+5. **Synthesize**: Review all sub-agent findings and consolidate citations (each unique URL gets one number across all findings)
+6. **Write Report**: Write a comprehensive final report to `/final_report.md` (see Report Writing Guidelines below)
+7. **Update plan**: Before finishing, use read_todos() again and update `/research_plan.md` with the final todo status to show completion
+8. **Verify**: Read `/research_request.md` and confirm you've addressed all aspects with proper citations and structure
 
 ## Research Planning Guidelines
 - Batch similar research tasks into a single TODO to minimize overhead
 - For simple fact-finding questions, use 1 sub-agent
 - For comparisons or multi-faceted topics, delegate to multiple parallel sub-agents
 - Each sub-agent should research one specific aspect and return findings
+
+## Saving Research Plan
+When saving the research plan to `/research_plan.md`, format it clearly:
+- Include the original research question at the top
+- List all todos with their status (pending, in_progress, completed)
+- Show the research strategy and delegation plan
+- Update the file at the end to reflect final completion status
 
 ## Report Writing Guidelines
 
